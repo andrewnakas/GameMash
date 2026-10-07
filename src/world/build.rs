@@ -82,11 +82,15 @@ pub struct Builder<'w, 's, 'a> {
     pub materials: &'a mut Assets<StandardMaterial>,
     pub rails: Vec<Vec<Vec3>>,
     batches: HashMap<([u8; 3], i32, i32), Batch>,
+    /// Night: lamp heads glow and some cast light.
+    night: bool,
+    glow: Option<(Handle<Mesh>, Handle<StandardMaterial>)>,
+    lamps: u32,
 }
 
 impl<'w, 's, 'a> Builder<'w, 's, 'a> {
     pub fn new(assets: &'a AssetServer, commands: &'a mut Commands<'w, 's>, meshes: &'a mut Assets<Mesh>, materials: &'a mut Assets<StandardMaterial>) -> Self {
-        Self { assets, commands, meshes, materials, rails: vec![], batches: HashMap::new() }
+        Self { assets, commands, meshes, materials, rails: vec![], batches: HashMap::new(), night: crate::core::scene::night(), glow: None, lamps: 0 }
     }
 
     fn batch(&mut self, color: [u8; 3], at: Vec3) -> &mut Batch {
@@ -190,7 +194,37 @@ impl<'w, 's, 'a> Builder<'w, 's, 'a> {
     pub fn lamp(&mut self, p: Vec3) {
         let e = self.boxy(p + Vec3::Y * 3.5, Vec3::new(0.09, 3.5, 0.09), [60, 64, 70]);
         self.commands.entity(e).insert(Anchor);
-        self.deco(p + Vec3::new(0.0, 7.05, 0.0), Vec3::new(0.25, 0.08, 0.25), [255, 240, 200]);
+        let head = p + Vec3::new(0.0, 7.05, 0.0);
+        if !self.night {
+            self.deco(head, Vec3::new(0.25, 0.08, 0.25), [255, 240, 200]);
+            return;
+        }
+        let (mesh, mat) = match &self.glow {
+            Some(g) => g.clone(),
+            None => {
+                let g = (
+                    self.meshes.add(Cuboid::new(0.5, 0.16, 0.5)),
+                    self.materials.add(StandardMaterial {
+                        base_color: Color::srgb(1.0, 0.86, 0.6),
+                        // ~4x white on screen so bloom catches it.
+                        emissive: LinearRgba::rgb(1.0, 0.8, 0.5) * crate::core::look::scene_units(4.0),
+                        ..default()
+                    }),
+                );
+                self.glow = Some(g.clone());
+                g
+            }
+        };
+        self.commands.spawn((Mesh3d(mesh), MeshMaterial3d(mat), Transform::from_translation(head)));
+        // Every fourth lamp casts real light: enough pools to read the streets, cheap enough for WebGL2.
+        self.lamps += 1;
+        if self.lamps % 4 == 0 {
+            self.commands.spawn((
+                // Bevy's 1e6 lm default suits ev100 9.7; scale to the night exposure.
+                PointLight { color: Color::srgb(1.0, 0.8, 0.55), intensity: 400_000.0 * 2f32.powf(crate::core::look::camera_ev100() - 9.7), range: 24.0, shadows_enabled: false, ..default() },
+                Transform::from_translation(head - Vec3::Y * 0.3),
+            ));
+        }
     }
 
     /// Spawns one mesh per (colour, block) batch.
