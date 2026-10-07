@@ -65,7 +65,7 @@ impl Plugin for PlayerPlugin {
             .insert_resource(SkateSim(Skater::new(SPAWN, 0.0)))
             .insert_resource(JumpSim { j: Jumper::new(SPAWN, 0.0), pending: JumpInput::default() })
             .insert_resource(WalkSim(Walker::new(SPAWN)))
-            .add_systems(Startup, spawn_player)
+            .add_systems(Startup, (spawn_player, enter_start_loco).chain())
             .add_systems(FixedUpdate, arbitrate.in_set(MoveSet::Arbitrate))
             .add_systems(FixedUpdate, foot_step.in_set(MoveSet::Locomotion).run_if(|p: Res<PlayerState>| p.loco == Loco::Foot))
             .add_systems(FixedUpdate, (fall_guard, sync_body).chain().in_set(MoveSet::Post))
@@ -107,6 +107,12 @@ pub fn spawn_player(mut commands: Commands) {
         respawn: SPAWN,
         impulse: Vec3::ZERO,
     });
+}
+
+/// Start on the board only when SKATE is on; otherwise on foot (URL presets can start without it).
+fn enter_start_loco(mut p: ResMut<PlayerState>, modes: Res<ActiveModes>, mut skate: ResMut<SkateSim>, mut jump: ResMut<JumpSim>, mut walk: ResMut<WalkSim>) {
+    let loco = if modes.on(Mode::Skate) { Loco::Skate } else { Loco::Foot };
+    enter_loco(loco, &mut p, &modes, &mut skate, &mut jump, &mut walk);
 }
 
 /// Moves the player into `to`, seeding the target sim with current momentum.
