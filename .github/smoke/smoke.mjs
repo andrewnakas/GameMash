@@ -14,8 +14,9 @@ try {
   await page.waitForFunction(() => !document.getElementById('loading'), null, { timeout: 240000 });
 } catch { mounted = false; }
 await page.waitForTimeout(8000);
-await page.screenshot({ path: 'smoke.png' });
-await browser.close();
+// Software WebGL can keep the main thread busy; the screenshot is a nice-to-have.
+try { await page.screenshot({ path: 'smoke.png', timeout: 60000, animations: 'allow', caret: 'initial' }); } catch (e) { logs.push(`[smoke] screenshot skipped: ${e.message.split('\n')[0]}`); }
+await browser.close().catch(() => {});
 
 const text = logs.join('\n');
 console.log(text.split('\n').filter((l) => !/wgpu|naga/i.test(l)).slice(0, 80).join('\n'));
