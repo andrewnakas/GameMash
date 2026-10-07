@@ -221,7 +221,7 @@ impl<'w, 's, 'a> Builder<'w, 's, 'a> {
         if self.lamps % 4 == 0 {
             self.commands.spawn((
                 // Bevy's 1e6 lm default suits ev100 9.7; scale to the night exposure.
-                PointLight { color: Color::srgb(1.0, 0.8, 0.55), intensity: 400_000.0 * 2f32.powf(crate::core::look::camera_ev100() - 9.7), range: 24.0, shadows_enabled: false, ..default() },
+                PointLight { color: Color::srgb(1.0, 0.8, 0.55), intensity: 400_000.0 * 2f32.powf(crate::core::look::camera_ev100() - 9.7), range: 24.0, shadow_maps_enabled: false, ..default() },
                 Transform::from_translation(head - Vec3::Y * 0.3),
             ));
         }

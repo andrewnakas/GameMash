@@ -82,7 +82,7 @@ fn hut(v: &mut Voxels, c: IVec3, door_dir: i32) {
             }
         }
     }
-    for (y, r) in [(4, 3), (5, 2), (6, 1)] {
+    for (y, r) in [(4, 3i32), (5, 2), (6, 1)] {
         for x in -r..=r {
             for z in -r..=r {
                 if x.abs() == r || z.abs() == r || y == 6 {
@@ -118,8 +118,8 @@ fn keep(v: &mut Voxels, c: IVec3) {
             }
         }
     }
-    for x in -2..=2 {
-        for z in -2..=2 {
+    for x in -2..=2i32 {
+        for z in -2..=2i32 {
             let shell = x.abs() == 2 || z.abs() == 2;
             for y in 1..=16 {
                 let door = z == -2 && x == 0 && y <= 2;
