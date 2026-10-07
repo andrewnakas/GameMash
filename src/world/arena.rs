@@ -7,11 +7,10 @@ use bevy::prelude::*;
 
 pub const RADIUS: f32 = 28.0;
 
-// These colours map to the concrete and dirt textures (see materials::surf_for).
-const FLOOR: [u8; 3] = [178, 176, 170];
-const STONE: [u8; 3] = [196, 192, 184];
-const DARK: [u8; 3] = [120, 120, 128];
-const MOSS: [u8; 3] = [110, 168, 96];
+const FLOOR: [u8; 3] = [118, 112, 104];
+const STONE: [u8; 3] = [146, 138, 124];
+const DARK: [u8; 3] = [86, 80, 74];
+const MOSS: [u8; 3] = [92, 108, 70];
 
 pub fn build_arena(assets: Res<AssetServer>, mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     let mut b = Builder::new(&assets, &mut commands, &mut meshes, &mut materials);
