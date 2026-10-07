@@ -14,7 +14,11 @@ fn main() {
     app
         .insert_resource(ClearColor(Color::srgb(0.62, 0.76, 0.92)))
         .insert_resource(Time::<Fixed>::from_hz(if cfg!(target_arch = "wasm32") { 60.0 } else { 120.0 }))
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
+            // No .meta sidecars ship with the assets; on the web each probe is a wasted 404.
+            meta_check: bevy::asset::AssetMetaCheck::Never,
+            ..default()
+        }).set(WindowPlugin {
             primary_window: Some(Window {
                 title: "GameMash".into(),
                 canvas: Some("#bevy".into()),
