@@ -200,7 +200,7 @@ fn boss_ai(
         sfx.write(Sfx::new("metal", 1.0));
     }
 
-    let anim;
+    let mut anim = "Sword_Idle";
     let mut anim_speed = 1.0;
     b.state = match b.state {
         BState::Idle(left) => {
@@ -263,8 +263,7 @@ fn boss_ai(
                 // Direct hit, then a shockwave ring to hop.
                 if flat(p.pos - land).length() < 3.5 && player_low {
                     p.health -= 30.0;
-                    let away = flat(p.pos - land).normalize_or_zero();
-                    p.impulse += away * 10.0 + Vec3::Y * 6.0;
+                    p.impulse += flat(p.pos - land).normalize_or_zero() * 10.0 + Vec3::Y * 6.0;
                 }
                 commands.spawn((Shockwave { t: 0.0, hit: false }, Mesh3d(assets.ring.clone()), MeshMaterial3d(assets.ring_mat.clone()), Transform::from_translation(land + Vec3::Y * 0.3)));
                 sfx.write(Sfx::new("explosion", 0.7));
@@ -380,8 +379,7 @@ fn shockwaves(time: Res<Time>, mut commands: Commands, mut q: Query<(Entity, &mu
         if !s.hit && low && (d - r).abs() < 0.9 {
             s.hit = true;
             p.health -= 18.0;
-            let away = flat(p.pos - tf.translation).normalize_or_zero();
-            p.impulse += away * 7.0 + Vec3::Y * 5.0;
+            p.impulse += flat(p.pos - tf.translation).normalize_or_zero() * 7.0 + Vec3::Y * 5.0;
         }
         if s.t > 0.75 {
             commands.entity(e).despawn();
