@@ -7,6 +7,7 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const logs = [];
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
+page.on('response', (r) => { if (r.status() >= 400) logs.push(`[http ${r.status()}] ${r.url()}`); });
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
 await page.goto(url, { timeout: 120000 });
 let mounted = true;
