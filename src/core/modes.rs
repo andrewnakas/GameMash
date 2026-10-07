@@ -196,8 +196,15 @@ impl Plugin for ModesPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(startup_modes().map(ActiveModes).unwrap_or_default())
             .add_message::<ModeToggled>()
+            .add_systems(Startup, log_start_modes)
             .add_systems(Update, (hotkeys, announce_changes).chain());
     }
+}
+
+/// One line at launch so embeds and CI can confirm which modes a URL preset turned on.
+fn log_start_modes(modes: Res<ActiveModes>) {
+    let names: Vec<_> = Mode::ALL.iter().filter(|m| modes.on(**m)).map(|m| m.name()).collect();
+    info!("start modes: {}", names.join(", "));
 }
 
 fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut modes: ResMut<ActiveModes>) {
