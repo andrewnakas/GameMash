@@ -14,4 +14,4 @@ The realm world is a tribute to "block-sandbox player inside an open-world fanta
 | Raider attack | 0.5 s wind-up, lands if you're within 2.5 m and in front; 15 damage | design |
 | Raider movement | walks 1.6 m/s, chases 3.9 m/s, steps up one block, can't climb two | observed |
 | Regeneration | +2.5 health/s after 4 s without damage | design |
-| World | 160 × 160 blocks: hills, a river, three villages, a stone keep | design |
+| World | 128 × 128 blocks: hills, a river, three villages, a stone keep | design |

@@ -41,7 +41,7 @@ impl Plugin for JumpPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Shards>()
             .add_systems(Startup, spawn_shards)
-            .add_systems(Update, (toggle, events.run_if(mode_on(Mode::Jump)), collect.run_if(mode_on(Mode::Jump)), spin));
+            .add_systems(Update, (toggle, events.run_if(mode_on(Mode::Jump)), collect.run_if(mode_on(Mode::Jump)).run_if(crate::core::scene::is(crate::core::scene::World::City)), spin));
     }
 }
 
@@ -55,9 +55,10 @@ fn spawn_shards(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut ma
     }
 }
 
-fn toggle(mut t: MessageReader<ModeToggled>, mut q: Query<(&Shard, &mut Visibility)>, shards: Res<Shards>) {
+fn toggle(mut t: MessageReader<ModeToggled>, mut q: Query<(&Shard, &mut Visibility)>, shards: Res<Shards>, world: Res<crate::core::scene::World>) {
     for ev in t.read() {
-        if ev.mode == Mode::Jump {
+        // Shards are placed around the city's landmarks; other worlds have none.
+        if ev.mode == Mode::Jump && *world == crate::core::scene::World::City {
             for (s, mut v) in q.iter_mut() {
                 *v = if ev.on && !shards.got[s.0] { Visibility::Visible } else { Visibility::Hidden };
             }

@@ -62,9 +62,11 @@ pub fn is(w: World) -> impl Fn(Res<World>) -> bool + Clone {
 }
 
 /// Where the player starts in each world (the realm sets its own once the terrain exists).
+/// Placing the player also enters the locomotion that matches the starting modes.
 pub fn spawn_point(w: World) -> Option<Vec3> {
     match w {
-        World::City | World::Realm => None,
+        World::City => Some(crate::core::player::SPAWN),
+        World::Realm => None,
         World::Arena => Some(Vec3::new(0.0, 1.0, -22.0)),
     }
 }

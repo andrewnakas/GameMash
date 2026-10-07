@@ -11,10 +11,10 @@ use crate::sim::voxel::{Block, Voxels, noise2};
 use bevy::prelude::*;
 
 /// Half-width of the realm in blocks.
-pub const R: i32 = 80;
-pub const KEEP: IVec2 = IVec2::new(0, 26);
-pub const VILLAGES: [IVec2; 3] = [IVec2::new(-46, -30), IVec2::new(44, -36), IVec2::new(-34, 48)];
-const SPAWN_XZ: IVec2 = IVec2::new(0, -58);
+pub const R: i32 = 64;
+pub const KEEP: IVec2 = IVec2::new(0, 22);
+pub const VILLAGES: [IVec2; 3] = [IVec2::new(-38, -26), IVec2::new(36, -30), IVec2::new(-28, 40)];
+const SPAWN_XZ: IVec2 = IVec2::new(0, -48);
 
 fn river_dist(x: f32, z: f32) -> f32 {
     let centre = 22.0 * (x * 0.035).sin() - 4.0;
