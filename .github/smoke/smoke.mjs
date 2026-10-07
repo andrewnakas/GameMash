@@ -25,5 +25,6 @@ const fail = [];
 if (!mounted) fail.push('first frame never drawn');
 if (!text.includes(`start modes: ${want}`)) fail.push(`missing "start modes: ${want}"`);
 if (/panicked|RuntimeError|unreachable/.test(text)) fail.push('wasm panic in console');
+if (/\[http 4\d\d\]/.test(text)) fail.push('failed requests (see [http] lines)');
 if (fail.length) { console.error('SMOKE FAIL: ' + fail.join('; ')); process.exit(1); }
 console.log('SMOKE OK');
