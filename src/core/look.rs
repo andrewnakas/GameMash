@@ -31,12 +31,7 @@ impl Plugin for LookPlugin {
         if HIGH_QUALITY {
             app.insert_resource(GlobalAmbientLight::NONE);
         } else {
-            let night = crate::core::scene::night();
-            app.insert_resource(GlobalAmbientLight {
-                color: if night { Color::srgb(0.35, 0.45, 0.8) } else { Color::srgb(0.72, 0.8, 0.95) },
-                brightness: if night { 60.0 } else { 900.0 },
-                ..default()
-            });
+            app.insert_resource(GlobalAmbientLight { color: Color::srgb(0.72, 0.8, 0.95), brightness: 900.0, ..default() });
         }
     }
 }
@@ -50,22 +45,19 @@ fn spawn_sun(mut commands: Commands, mut media: ResMut<Assets<ScatteringMedium>>
         ..default()
     }
     .build();
-    let night = crate::core::scene::night();
     let sun_dir = Transform::from_xyz(-0.55, 0.42, -0.72).looking_at(Vec3::ZERO, Vec3::Y);
-    let day_lux = if HIGH_QUALITY { lux::RAW_SUNLIGHT } else { 9_000.0 };
     commands.spawn((
         Sun,
         DirectionalLight {
-            // Moonlight: a dim, cold key light; exposure is raised to match in `main_camera_look`.
-            illuminance: if night { day_lux * 0.004 } else { day_lux },
-            color: if night { Color::srgb(0.62, 0.72, 1.0) } else { Color::srgb(1.0, 0.96, 0.9) },
+            illuminance: if HIGH_QUALITY { lux::RAW_SUNLIGHT } else { 9_000.0 },
+            color: Color::srgb(1.0, 0.96, 0.9),
             shadow_maps_enabled: HIGH_QUALITY && !off("shadow"),
             ..default()
         },
         cascades,
         sun_dir,
     ));
-    if HIGH_QUALITY && !off("atmo") && !night {
+    if HIGH_QUALITY && !off("atmo") {
         commands.spawn(Atmosphere::earth(media.add(ScatteringMedium::earth(256, 256))));
     }
 }
@@ -73,27 +65,18 @@ fn spawn_sun(mut commands: Commands, mut media: ResMut<Assets<ScatteringMedium>>
 /// Look components for the main camera, attached at spawn (the atmosphere
 /// pipeline must see them on the camera's first frame).
 pub fn main_camera_look() -> impl Bundle {
-    let night = crate::core::scene::night();
-    let base = (Tonemapping::AgX, Bloom { intensity: if night { 0.22 } else { 0.08 }, ..Bloom::NATURAL });
-    (base, Exposure { ev100: camera_ev100() })
-}
-
-/// Camera exposure. At night the moon is ~250x dimmer than the sun, so open up
-/// 6 stops: the city reads as moonlit rather than black.
-pub fn camera_ev100() -> f32 {
-    (if HIGH_QUALITY { 13.5 } else { 9.7 }) - if crate::core::scene::night() { 6.0 } else { 0.0 }
-}
-
-/// Converts a desired on-screen brightness (1.0 = white) into scene units at the current exposure.
-pub fn scene_units(screen: f32) -> f32 {
-    screen * 1.2 * 2f32.powf(camera_ev100())
+    let base = (Tonemapping::AgX, Bloom { intensity: 0.08, ..Bloom::NATURAL });
+    (
+        base,
+        if HIGH_QUALITY { Exposure { ev100: 13.5 } } else { Exposure { ev100: 9.7 } },
+    )
 }
 
 /// Physical sky, IBL, TAA and SSAO on the high-quality path, attached in the
 /// same command batch as the camera spawn.
 pub fn attach_high_quality(cam: &mut EntityCommands) {
     if HIGH_QUALITY {
-        if !off("atmo") && !crate::core::scene::night() {
+        if !off("atmo") {
             // Cheaper LUTs: the sky barely changes, so low sample counts and
             // small tables look the same at a fraction of the GPU cost.
             let light = std::env::var("GAMEMASH_ATMO_FULL").is_err();
@@ -133,5 +116,5 @@ pub fn attach_high_quality(cam: &mut EntityCommands) {
 
 /// The same look for secondary cameras (portal views), minus temporal effects.
 pub fn secondary_camera_look() -> impl Bundle {
-    (Tonemapping::AgX, Exposure { ev100: camera_ev100() })
+    (Tonemapping::AgX, if HIGH_QUALITY { Exposure { ev100: 13.5 } } else { Exposure { ev100: 9.7 } })
 }

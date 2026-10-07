@@ -14,11 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { query: 'modes=skate,portals', want: 'SKATE, PORTALS', world: 'City' }
-          - { query: 'modes=jump,warfare,bullettime', want: 'JUMP, WARFARE, BULLET-TIME', world: 'City' }
-          - { query: 'world=realm&modes=blocks', want: 'BLOCKS', world: 'Realm' }
-          - { query: 'world=arena&modes=jump', want: 'JUMP', world: 'Arena' }
-          - { query: 'time=night&modes=streets,swing', want: 'STREETS, SWING', world: 'City (night)' }
+          - { modes: 'skate,portals', want: 'SKATE, PORTALS' }
+          - { modes: 'jump,warfare,bullettime', want: 'JUMP, WARFARE, BULLET-TIME' }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,9 +24,8 @@ jobs:
       - run: npm i --no-save playwright@1 && npx playwright install --with-deps chromium
       - name: Load preset
         env:
-          URL: https://andrewnakas.github.io/GameMash/gamemash/gl/?${{ matrix.query }}&panel=0
+          URL: https://andrewnakas.github.io/GameMash/gamemash/gl/?modes=${{ matrix.modes }}&panel=0
           WANT: ${{ matrix.want }}
-          WANT_WORLD: ${{ matrix.world }}
         run: node .github/smoke/smoke.mjs
       - uses: actions/upload-artifact@v4
         if: always()

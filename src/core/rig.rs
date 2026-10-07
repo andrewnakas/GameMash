@@ -40,11 +40,6 @@ pub const CLIPS: &[&str] = &[
     "Punch_Cross",
     "Driving_Loop",
     "Swim_Idle_Loop",
-    "Punch_Jab",
-    "Sword_Attack",
-    "Sword_Idle",
-    "Hit_Head",
-    "Fixing_Kneeling",
 ];
 
 #[derive(Component)]
@@ -67,10 +62,6 @@ impl Rig {
     }
     pub fn person(model: &'static str, hair: Option<&'static str>) -> Self {
         Self { model, hair, ..default() }
-    }
-    pub fn with_tint(mut self, m: Handle<StandardMaterial>) -> Self {
-        self.tint = Some(m);
-        self
     }
 }
 

@@ -53,8 +53,8 @@ pub fn spawn_camera(mut commands: Commands) {
         Transform::from_xyz(0.0, 3.0, -36.0),
         crate::core::look::main_camera_look(),
         DistanceFog {
-            color: if crate::core::scene::night() { Color::srgb(0.03, 0.04, 0.08) } else { Color::srgb(0.66, 0.78, 0.92) },
-            falloff: if crate::core::scene::night() { FogFalloff::Linear { start: 40.0, end: 260.0 } } else { FogFalloff::Linear { start: 140.0, end: 520.0 } },
+            color: Color::srgb(0.66, 0.78, 0.92),
+            falloff: FogFalloff::Linear { start: 140.0, end: 520.0 },
             ..default()
         },
     ));

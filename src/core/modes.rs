@@ -194,12 +194,10 @@ pub struct ModesPlugin;
 
 impl Plugin for ModesPlugin {
     fn build(&self, app: &mut App) {
-        let pinned = crate::core::scene::startup_world().pinned();
-        let start = startup_modes().map(ActiveModes).unwrap_or_default();
-        app.insert_resource(ActiveModes(start.0 | pinned))
+        app.insert_resource(startup_modes().map(ActiveModes).unwrap_or_default())
             .add_message::<ModeToggled>()
             .add_systems(Startup, log_start_modes)
-            .add_systems(Update, (hotkeys, pin_world_modes, announce_changes).chain());
+            .add_systems(Update, (hotkeys, announce_changes).chain());
     }
 }
 
@@ -215,14 +213,6 @@ fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut modes: ResMut<ActiveModes>) {
             let on = modes.on(m);
             modes.set(m, !on);
         }
-    }
-}
-
-/// Modes the current world depends on stay on, whatever the panel or hotkeys say.
-fn pin_world_modes(world: Res<crate::core::scene::World>, mut modes: ResMut<ActiveModes>) {
-    let pinned = world.pinned();
-    if modes.0 & pinned != pinned {
-        modes.0 |= pinned;
     }
 }
 
