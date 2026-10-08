@@ -19,6 +19,7 @@ const FILES: &[(&str, &str)] = &[
     ("land", "sounds/skate_land.mp3"),
     ("grind", "sounds/grind_hit.ogg"),
     ("metal", "sounds/metal_light.ogg"),
+    ("wood", "sounds/wood_hit.ogg"),
     ("step0", "sounds/step_0.ogg"),
     ("step1", "sounds/step_1.ogg"),
     ("step2", "sounds/step_2.ogg"),

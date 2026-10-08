@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Asset licences (assets/MANIFEST.toml)
+        run: python3 scripts/check_assets.py
       - name: System libraries
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - uses: dtolnay/rust-toolchain@stable
@@ -27,7 +29,12 @@ jobs:
       - run: cargo test --locked
 
   web:
+    # One job per game; they share the dependency cache, so only the game crate and link differ.
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bin: [gamemash, blockrealm, hollow_warden, night_swing, kickflip_ops, block_city]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -35,37 +42,24 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
-          key: wasm
+          shared-key: wasm
+          save-if: ${{ matrix.bin == 'gamemash' }}
           cache-on-failure: true
       - uses: taiki-e/install-action@v2
         with:
           tool: trunk
       - name: Build WebGL2 and WebGPU variants
-        run: |
-          trunk build --release --dist dist/gl --public-url ./ index.html
-          trunk build --release --dist dist/gpu --public-url ./ index-gpu.html
-          cp web/loader.html dist/index.html
+        run: scripts/build-web.sh ${{ matrix.bin }}
       - name: Sizes
-        run: du -sh dist/gl dist/gpu && ls -la dist/gl/*.wasm dist/gpu/*.wasm
-      - name: Stage site (game served under /gamemash/)
-        run: |
-          mkdir -p site/gamemash
-          cp -r dist/. site/gamemash/
-          printf '<meta http-equiv="refresh" content="0; url=gamemash/">' > site/index.html
-          touch site/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - name: Zip web build
-        if: startsWith(github.ref, 'refs/tags/')
-        run: cd dist && zip -qr ../gamemash-web.zip .
+        run: du -sh dist/*/gl dist/*/gpu && ls -la dist/*/gl/*.wasm dist/*/gpu/*.wasm
       - uses: actions/upload-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: gamemash-web
-          path: gamemash-web.zip
+          name: web-${{ matrix.bin }}
+          path: dist
+          retention-days: 7
 
   pages:
+    # Every game under one Pages site: /GameMash/<game>/ (dashes, e.g. /GameMash/night-swing/).
     # The web build ships even if a unit test is red; native releases still wait for tests.
     needs: web
     if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
@@ -77,8 +71,31 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: web-*
+          path: dist
+          merge-multiple: true
+      - name: Stage site
+        run: |
+          mkdir site
+          for d in dist/*/; do b=$(basename "$d"); cp -r "$d" "site/${b//_/-}"; done
+          printf '<meta http-equiv="refresh" content="0; url=gamemash/">' > site/index.html
+          touch site/.nojekyll
+          ls site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
       - id: deploy
         uses: actions/deploy-pages@v4
+      - name: Zip web builds
+        if: startsWith(github.ref, 'refs/tags/')
+        run: for d in site/*/; do (cd "$d" && zip -qr "../../$(basename "$d")-web.zip" .); done
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: web-zips
+          path: '*-web.zip'
 
   native:
     if: startsWith(github.ref, 'refs/tags/')
@@ -87,9 +104,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest, name: linux-x64, bin: gamemash }
-          - { os: windows-latest, name: windows-x64, bin: gamemash.exe }
-          - { os: macos-latest, name: macos-arm64, bin: gamemash }
+          - { os: ubuntu-latest, name: linux-x64, ext: '' }
+          - { os: windows-latest, name: windows-x64, ext: .exe }
+          - { os: macos-latest, name: macos-arm64, ext: '' }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -98,22 +115,26 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --release --locked
-      - name: Package
+      - run: cargo build --release --locked --bins
+      - name: Package each game
         shell: bash
         run: |
-          mkdir -p pkg/gamemash
-          cp target/release/${{ matrix.bin }} pkg/gamemash/
-          cp -r assets README.md pkg/gamemash/
-          cd pkg && 7z a -bd ../gamemash-${{ matrix.name }}.zip gamemash >/dev/null
+          for src in src/main.rs src/bin/*.rs; do
+            b=$(basename "$src" .rs); [ "$b" = main ] && b=gamemash
+            mkdir -p "pkg/$b"
+            cp "target/release/$b${{ matrix.ext }}" "pkg/$b/"
+            cp -r assets README.md "pkg/$b/"
+            (cd pkg && 7z a -bd "../${b//_/-}-${{ matrix.name }}.zip" "$b" >/dev/null)
+          done
+          ls *.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: gamemash-${{ matrix.name }}
-          path: gamemash-${{ matrix.name }}.zip
+          name: native-${{ matrix.name }}
+          path: '*.zip'
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [web, native]
+    needs: [pages, native]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -17,11 +17,27 @@ Synergies get bonus scores. Examples: "KICKFLIP KILL" for a kill mid-trick, "AER
 
 **Clean room.** Every mechanic is an original implementation, written from observed behaviour and publicly documented values (see `docs/specs/`). No decompiled code, ROM or disc data, original assets, names or likenesses are used.
 
+## One engine, six games
+GameMash is also the engine for five clean-room tribute games. Each tribute locks one combination of modes, one world and one time of day: a `GameConfig` in `src/games.rs` and a three-line binary in `src/bin/`.
+
+| Game | Binary | Modes · world | Tribute to |
+|---|---|---|---|
+| GameMash | `gamemash` | any, live · `?world=` | — |
+| Blockrealm | `blockrealm` | BLOCKS · realm | SkyCraft (Minecraft in Skyrim) |
+| Hollow Warden | `hollow_warden` | JUMP · arena | ER Mario (Mario in Elden Ring) |
+| Night Swing | `night_swing` | STREETS + SWING · city at night | ArkWeb |
+| Kickflip Ops | `kickflip_ops` | SKATE + WARFARE + BLOCKS · city | 2010 Rust Rewrite Mashup |
+| Block City | `block_city` | STREETS + BLOCKS · city | Minecraft-in-GTA V mods |
+
+All six are built by CI and published under https://andrewnakas.github.io/GameMash/<game>/ (for example `/GameMash/night-swing/`).
+
 ## Run
 ```sh
 cargo run                      # native
 cargo test                     # sim + rules unit tests
+cargo run --bin night_swing    # a tribute game
 trunk serve --release          # web build at http://127.0.0.1:8080 (uses the rustup toolchain: wasm32 target)
+scripts/build-web.sh night_swing  # both web variants + loader into dist/night_swing/
 ```
 
 Automation harness (native only): see `src/core/debug.rs`. Example:
@@ -31,7 +47,9 @@ Automation harness (native only): see `src/core/debug.rs`. Example:
 - `src/sim/`: engine-free, unit-tested sims (skate, jump, walker, car, voxel, collision).
 - `src/core/`: modes, shared player and locomotion hand-off, input latch, camera, hotbar, scoring and synergies, UI, FX.
 - `src/modes/`: one plugin per game mode.
-- `src/world/`: the procedural city and geometry builder.
+- `src/world/`: the procedural city, the realm and arena worlds, and the geometry builder.
+- `src/game.rs`, `src/games.rs`, `src/bin/`: which game a build is.
+- `scripts/web_html.py`: generates each game's web page from `index.html`.
 - `index.html`: the web page, with ad slots (left and right rails, bottom banner).
 
 ## Play and download

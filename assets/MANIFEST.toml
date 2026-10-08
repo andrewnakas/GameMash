@@ -1,0 +1,68 @@
+# Where every file under assets/ came from. scripts/check_assets.py (CI) fails on any
+# file not matched by exactly one entry, and on any licence outside ALLOWED.
+# `replace = true` marks a file scheduled to be swapped for a CC0 or original one;
+# CI warns on those instead of failing, so remove the flag only by replacing the file.
+
+[[asset]]
+files = ["textures/*/*.jpg"]
+what = "PBR textures: concrete_floor_02, concrete_pavement, asphalt_02, red_brick_03, blue_metal_plate, plywood, dirt"
+author = "Poly Haven"
+source = "https://polyhaven.com/textures"
+license = "CC0"
+
+[[asset]]
+files = ["sky/skate_park_1k.hdr"]
+what = "Sky HDRI: skate_park"
+author = "Poly Haven"
+source = "https://polyhaven.com/a/skate_park"
+license = "CC0"
+
+[[asset]]
+files = ["models/UAL1_Standard.glb", "models/people/anims.bin"]
+what = "Universal Animation Library (UAL1 Standard): rig and animations"
+author = "Quaternius"
+source = "https://quaternius.com"
+license = "CC0"
+
+[[asset]]
+files = ["models/people/body.bin", "models/people/Hair_*", "models/people/T_*.png", "models/people/skater*", "models/people/soldier*"]
+what = "Universal Base Characters: bodies, hair, eyes; outfits painted by tools/paint_outfits.py"
+author = "Quaternius"
+source = "https://quaternius.com"
+license = "CC0"
+
+[[asset]]
+files = ["models/ak.gltf", "models/pistol.gltf"]
+what = "Rifle and pistol models"
+author = "loafbrr"
+source = "https://opengameart.org"
+license = "CC0"
+
+[[asset]]
+files = ["sounds/rifle_shot.wav", "sounds/pistol_shot.wav"]
+what = "Gunshot recordings (sks, cz)"
+author = "Vincent Sevedge"
+source = "https://opengameart.org/content/gunshot-sounds"
+license = "CC-BY-3.0"
+replace = true
+
+[[asset]]
+files = ["sounds/*_reload.wav", "sounds/explosion.mp3", "sounds/engine_loop.wav"]
+what = "Reloads, explosion, engine loop"
+author = "OpenGameArt contributors"
+source = "https://opengameart.org"
+license = "CC0"
+
+[[asset]]
+files = ["sounds/skate_*.mp3"]
+what = "Skateboard roll, land, ollie"
+author = "FOSSarts"
+source = "https://freesound.org/people/FOSSarts/packs/41196/"
+license = "CC0"
+
+[[asset]]
+files = ["sounds/step_*.ogg", "sounds/grind_hit.ogg", "sounds/metal_light.ogg", "sounds/wood_hit.ogg"]
+what = "Footsteps and impacts (Impact Sounds)"
+author = "Kenney"
+source = "https://kenney.nl/assets/impact-sounds"
+license = "CC0"

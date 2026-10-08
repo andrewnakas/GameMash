@@ -2,6 +2,7 @@
 name = "gamemash"
 version = "0.1.0"
 edition = "2024"
+default-run = "gamemash"
 
 [dependencies]
 bevy = { version = "0.19", features = ["jpeg", "hdr", "mp3", "wav"] }

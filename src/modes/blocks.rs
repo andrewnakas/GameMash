@@ -12,7 +12,9 @@ use crate::core::score::{Kind, MashEvent};
 use crate::core::ui::Hud;
 use crate::sim::voxel::{Block, Voxels, noise2};
 use crate::world::build::PortalSurface;
+use crate::core::scene::{self, World};
 use crate::world::city::{LOT, QUARRY, block_center};
+use crate::world::realm;
 use bevy::asset::RenderAssetUsages;
 use bevy::image::{ImageAddressMode, ImageFilterMode, ImageSampler, ImageSamplerDescriptor};
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -54,7 +56,11 @@ impl Plugin for BlocksPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<VoxelWorld>()
             .init_resource::<BuildState>()
-            .add_systems(Startup, (setup, generate_quarry))
+            .add_systems(Startup, (setup, generate_quarry.run_if(scene::is(World::City))))
+            .add_systems(
+                Startup,
+                (realm::build_realm_base, (realm::generate_realm, realm::place_realm_spawn).chain().after(crate::core::player::spawn_player)).run_if(scene::is(World::Realm)),
+            )
             .add_systems(FixedUpdate, interact.in_set(MoveSet::Abilities).run_if(mode_on(Mode::Blocks)))
             .add_systems(Update, (show_hide, remesh, sync_rails, tnt_fuse, explosions_carve, hud_and_highlight));
     }
@@ -313,6 +319,7 @@ fn interact(
     mut commands: Commands,
     mats: Res<BlockMats>,
     fx: Res<crate::core::fx::FxAssets>,
+    melee: Res<crate::modes::raiders::MeleeTarget>,
 ) {
     // Scroll / brackets cycle the block type.
     let n = Block::PLACEABLE.len() as i32;
@@ -325,7 +332,8 @@ fn interact(
     }
     st.selected = sel.rem_euclid(n) as usize;
 
-    if bar.item != Item::Blocks || !look.captured {
+    // A raider in reach takes the click instead of the block behind it.
+    if bar.item != Item::Blocks || !look.captured || melee.0.is_some() {
         st.target = None;
         st.breaking = None;
         return;

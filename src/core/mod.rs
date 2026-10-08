@@ -12,5 +12,6 @@ pub mod modes;
 pub mod phys;
 pub mod player;
 pub mod rig;
+pub mod scene;
 pub mod score;
 pub mod ui;
