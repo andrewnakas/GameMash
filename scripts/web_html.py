@@ -51,7 +51,7 @@ def main(bin_name: str, variant: str) -> None:
         s = sub(s, r"Loading the city…", f"Loading {title}…")
         s = sub(s, r"<footer>All mechanics are original clean-room recreations.*?<br>",
                 f'<footer>A clean-room tribute to {tribute}: original code, no game files, names or likenesses. '
-                f'Not affiliated with any publisher or with the original project. <a href="https://aimashups.com/play/{slug}/">aimashups.com</a><br>')
+                f'Not affiliated with any publisher or with the original project. <a href="https://aigamemashups.com/play/{slug}/">aigamemashups.com</a><br>')
     out = ROOT / f".web-{bin_name}-{variant}.html"
     out.write_text(s)
     print(out.name)
