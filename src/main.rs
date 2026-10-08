@@ -38,6 +38,7 @@ fn main() {
         .add_plugins(EguiPlugin::default())
         .insert_resource(bevy_egui::EguiGlobalSettings { auto_create_primary_context: false, ..default() })
         .add_plugins((
+            core::scene::ScenePlugin,
             core::modes::ModesPlugin,
             core::input::InputPlugin,
             core::player::PlayerPlugin,
@@ -60,8 +61,10 @@ fn main() {
             modes::swing::SwingPlugin,
             modes::portals::PortalsPlugin,
             modes::bullettime::BulletTimePlugin,
+            modes::raiders::RaidersPlugin,
+            modes::boss::BossPlugin,
         ))
-        .add_systems(Startup, world::city::build_city)
+        .add_systems(Startup, world::city::build_city.run_if(core::scene::is(core::scene::World::City)))
         .add_systems(PostUpdate, world::materials::generate_mips);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_plugins(core::debug::DebugPlugin);
