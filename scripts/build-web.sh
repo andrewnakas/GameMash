@@ -10,7 +10,8 @@ export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-4}"
 for v in gl gpu; do
   page=$(python3 scripts/web_html.py "$bin" "$v")
   trunk build --release --dist "dist/$bin/$v" --public-url ./ "$page"
-  mv "dist/$bin/$v/$page" "dist/$bin/$v/index.html"
+  # Trunk names the output index.html whatever the input page is called.
+  test -f "dist/$bin/$v/index.html"
 done
 sed "s|<title>.*</title>|<title>$(grep -o '<title>[^<]*' "dist/$bin/gl/index.html" | cut -c8-)</title>|" web/loader.html > "dist/$bin/index.html"
 echo "built dist/$bin/{gl,gpu,index.html}"
