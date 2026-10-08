@@ -19,6 +19,12 @@ jobs:
           - { query: 'world=realm&modes=blocks', want: 'BLOCKS', world: 'Realm' }
           - { query: 'world=arena&modes=jump', want: 'JUMP', world: 'Arena' }
           - { query: 'time=night&modes=streets,swing', want: 'STREETS, SWING', world: 'City (night)' }
+          # Tribute games: modes, world and time are fixed by the game, not the URL.
+          - { game: blockrealm, want: 'BLOCKS', world: 'Realm' }
+          - { game: hollow-warden, want: 'JUMP', world: 'Arena' }
+          - { game: night-swing, want: 'STREETS, SWING', world: 'City (night)' }
+          - { game: kickflip-ops, want: 'SKATE, WARFARE, BLOCKS', world: 'City' }
+          - { game: block-city, want: 'STREETS, BLOCKS', world: 'City' }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,7 +33,7 @@ jobs:
       - run: npm i --no-save playwright@1 && npx playwright install --with-deps chromium
       - name: Load preset
         env:
-          URL: https://andrewnakas.github.io/GameMash/gamemash/gl/?${{ matrix.query }}&panel=0
+          URL: https://andrewnakas.github.io/GameMash/${{ matrix.game || 'gamemash' }}/gl/?${{ matrix.query }}&panel=0
           WANT: ${{ matrix.want }}
           WANT_WORLD: ${{ matrix.world }}
         run: node .github/smoke/smoke.mjs

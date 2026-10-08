@@ -1,4 +1,4 @@
-//! Mash panel (Tab) and the HUD. Modes publish their HUD text through `Hud`
+//! Mash panel or, in a tribute game, controls screen (Tab), and the HUD. Modes publish their HUD text through `Hud`
 //! each frame, so the UI never needs to know mode internals.
 
 use crate::core::camera::CamRig;
@@ -173,8 +173,12 @@ fn hud_ui(
         });
     }
 
-    // Mode chips.
+    // Mode chips (a tribute game's modes are fixed, so it just points at the controls).
     egui::Area::new(egui::Id::new("chips")).anchor(egui::Align2::CENTER_BOTTOM, [0.0, -12.0]).show(ctx, |ui| {
+        if crate::game::game().modes.is_some() {
+            ui.label(egui::RichText::new("Tab: controls").size(12.0).color(egui::Color32::from_gray(200)));
+            return;
+        }
         ui.horizontal(|ui| {
             for m in Mode::ALL {
                 let on = modes.on(m);
@@ -198,6 +202,10 @@ fn panel_ui(mut contexts: EguiContexts, mut open: ResMut<PanelOpen>, mut modes: 
         return Ok(());
     }
     let ctx = contexts.ctx_mut()?;
+    if crate::game::game().modes.is_some() {
+        controls_screen(ctx, &mut open, &p);
+        return Ok(());
+    }
     // Fit small browser windows: one column and a scroll area when narrow.
     let screen = ctx.content_rect();
     let width = (screen.width() - 90.0).clamp(260.0, 760.0);
@@ -264,4 +272,38 @@ fn panel_ui(mut contexts: EguiContexts, mut open: ResMut<PanelOpen>, mut modes: 
             });
         });
     Ok(())
+}
+
+/// A tribute game's Tab screen: what it is and how to play it.
+fn controls_screen(ctx: &egui::Context, open: &mut PanelOpen, p: &PlayerState) {
+    let game = crate::game::game();
+    let screen = ctx.content_rect();
+    let width = (screen.width() - 90.0).clamp(260.0, 640.0);
+    egui::Window::new(game.title.to_uppercase())
+        .collapsible(false)
+        .resizable(false)
+        .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+        .fixed_size([width, (screen.height() - 60.0).max(200.0)])
+        .show(ctx, |ui| {
+            egui::ScrollArea::vertical().max_height((screen.height() - 120.0).max(160.0)).show(ui, |ui| {
+                ui.label(egui::RichText::new(game.tagline).size(15.0));
+                ui.add_space(8.0);
+                ui.label(egui::RichText::new("WASD move.  Space jump.  Shift sprint.  Mouse look.  V first/third person.  Esc frees the mouse.").size(12.5));
+                for m in game.modes.unwrap_or(&[]) {
+                    ui.add(egui::Label::new(egui::RichText::new(m.controls()).size(12.0).color(egui::Color32::from_gray(200))).wrap());
+                }
+                ui.add_space(6.0);
+                for line in game.help {
+                    ui.add(egui::Label::new(*line).wrap());
+                }
+                if p.loco == Loco::Vehicle {
+                    ui.label("In a car: E to get out.");
+                }
+                ui.add_space(8.0);
+                if ui.button(egui::RichText::new("PLAY  (Tab)").size(18.0).strong()).clicked() {
+                    open.0 = false;
+                }
+                ui.label(egui::RichText::new("A clean-room tribute: original code and CC0 assets. No code, assets or names from the games that inspired it.").size(10.0).color(egui::Color32::from_gray(150)));
+            });
+        });
 }

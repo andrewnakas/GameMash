@@ -1,5 +1,6 @@
 //! Which world the modes play in, and the time of day.
 //!
+//! A tribute game fixes both (see `games.rs`). Otherwise
 //! `?world=city|realm|arena` (web) or `GAMEMASH_WORLD` (native) picks the map;
 //! `?time=night` / `GAMEMASH_TIME=night` turns the lights down. Each world can
 //! pin modes it can't work without (the realm is made of blocks, the arena is
@@ -45,6 +46,9 @@ fn launch_param(key: &str, env: &str) -> Option<String> {
 }
 
 pub fn startup_world() -> World {
+    if let Some(w) = crate::game::game().world {
+        return w;
+    }
     match launch_param("world", "GAMEMASH_WORLD").as_deref().map(str::to_ascii_lowercase).as_deref() {
         Some("realm") => World::Realm,
         Some("arena") => World::Arena,
@@ -54,6 +58,9 @@ pub fn startup_world() -> World {
 
 /// Night lighting, read once at startup by the sky, sun, fog and lamps.
 pub fn night() -> bool {
+    if let Some(n) = crate::game::game().night {
+        return n;
+    }
     launch_param("time", "GAMEMASH_TIME").is_some_and(|t| t.eq_ignore_ascii_case("night"))
 }
 

@@ -194,9 +194,11 @@ pub struct ModesPlugin;
 
 impl Plugin for ModesPlugin {
     fn build(&self, app: &mut App) {
-        let pinned = crate::core::scene::startup_world().pinned();
-        let start = startup_modes().map(ActiveModes).unwrap_or_default();
-        app.insert_resource(ActiveModes(start.0 | pinned))
+        let start = crate::game::game().locked().unwrap_or_else(|| {
+            let pinned = crate::core::scene::startup_world().pinned();
+            startup_modes().map(ActiveModes).unwrap_or_default().0 | pinned
+        });
+        app.insert_resource(ActiveModes(start))
             .add_message::<ModeToggled>()
             .add_systems(Startup, log_start_modes)
             .add_systems(Update, (hotkeys, pin_world_modes, announce_changes).chain());
@@ -210,6 +212,9 @@ fn log_start_modes(modes: Res<ActiveModes>) {
 }
 
 fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut modes: ResMut<ActiveModes>) {
+    if crate::game::game().modes.is_some() {
+        return;
+    }
     for m in Mode::ALL {
         if keys.just_pressed(m.hotkey()) {
             let on = modes.on(m);
@@ -219,10 +224,11 @@ fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut modes: ResMut<ActiveModes>) {
 }
 
 /// Modes the current world depends on stay on, whatever the panel or hotkeys say.
+/// A game with fixed modes keeps exactly those.
 fn pin_world_modes(world: Res<crate::core::scene::World>, mut modes: ResMut<ActiveModes>) {
-    let pinned = world.pinned();
-    if modes.0 & pinned != pinned {
-        modes.0 |= pinned;
+    let want = crate::game::game().locked().unwrap_or(modes.0 | world.pinned());
+    if modes.0 != want {
+        modes.0 = want;
     }
 }
 
