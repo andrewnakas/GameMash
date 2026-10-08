@@ -53,7 +53,7 @@ Automation harness (native only): see `src/core/debug.rs`. Example:
 - `index.html`: the web page, with ad slots (left and right rails, bottom banner).
 
 ## Play and download
-- **Browser:** https://andrewnakas.github.io/GameMash/gamemash/. Start with specific modes on: `?modes=skate,warfare` (add `&panel=0` to skip the mode panel). Embedded on [aimashups.com](https://aimashups.com/play/).
+- **Browser:** https://andrewnakas.github.io/GameMash/gamemash/. Start with specific modes on: `?modes=skate,warfare` (add `&panel=0` to skip the mode panel). Embedded on [aigamemashups.com](https://aigamemashups.com/play/).
 - **Desktop:** Windows, macOS and Linux builds are on [Releases](https://github.com/andrewnakas/GameMash/releases), built by CI for every `v*` tag.
 
 CI (`.github/workflows/ci.yml`) runs the tests, builds both web variants, publishes them to GitHub Pages, and on tags builds the native releases.
