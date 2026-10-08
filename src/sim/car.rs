@@ -172,11 +172,16 @@ impl CarSim {
             let yaw_rate = speed / (t.half_len * 2.4) * self.steer_vis.tan();
             self.yaw += yaw_rate * dt * if inp.handbrake { 1.5 } else { 1.0 };
 
+            // Turning leaves the velocity pointing the old way: re-read speed and slip
+            // against the new heading, so the handbrake's lower grip has slip to keep.
+            let nf = fwd(self.yaw);
+            let nr = Vec3::new(nf.z, 0.0, -nf.x);
+            let v = f * speed + r * lateral;
+            speed = v.dot(nf);
+            lateral = v.dot(nr);
             // Tyres kill sideways slip; the handbrake lets the rear step out.
             let grip = if inp.handbrake { t.handbrake_grip } else { t.grip };
             lateral -= lateral * (grip * dt).min(1.0);
-            let nf = fwd(self.yaw);
-            let nr = Vec3::new(nf.z, 0.0, -nf.x);
             // Travel follows the surface pitch so ramps launch the car.
             let tilted = Vec3::new(nf.x * self.pitch.cos(), self.pitch.sin(), nf.z * self.pitch.cos());
             self.vel = tilted * speed + nr * lateral;
