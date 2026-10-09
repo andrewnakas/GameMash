@@ -7,7 +7,7 @@
 | Character + animations: Universal Animation Library (UAL1 Standard) | Quaternius | CC0 |
 | Human bodies, hair, eyes: Universal Base Characters (outfits painted by tools/paint_outfits.py) | Quaternius | CC0 |
 | AK rifle and pistol models | loafbrr (OpenGameArt) | CC0 |
-| Gunshot recordings (sks, cz) | Vincent Sevedge (OpenGameArt "gunshot-sounds") | CC-BY 3.0 |
+| Rifle and pistol shots | Synthesised by `scripts/gen_gunshots.py` (no recordings) | Original |
 | Reload sounds, explosion, engine loop | OpenGameArt contributors | CC0 |
 | Skateboard roll / land / ollie | FOSSarts, Freesound (pack 41196) | CC0 |
 | Footsteps and impacts | Kenney (kenney.nl) Impact Sounds | CC0 |

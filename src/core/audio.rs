@@ -1,6 +1,6 @@
 //! Sound. One-shots go through the `Sfx` message; continuous sounds (board
 //! roll, engine) are looping sinks whose volume and pitch follow the sims.
-//! All recordings are CC0/CC-BY (see assets/CREDITS.md).
+//! Recordings are CC0; the gunshots are synthesised (see assets/CREDITS.md).
 
 use crate::core::modes::{ActiveModes, Mode};
 use crate::core::player::{Loco, PlayerState, SkateSim};

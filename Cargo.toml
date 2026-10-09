@@ -32,6 +32,9 @@ codegen-units = 1
 strip = true
 
 [profile.wasm-release]
+# Speed over size for the sims; size comes from fat LTO here and wasm-opt stripping
+# the name and debug sections (index.html, data-wasm-opt-params).
 inherits = "release"
 opt-level = 3
-lto = "thin"
+lto = "fat"
+debug = false

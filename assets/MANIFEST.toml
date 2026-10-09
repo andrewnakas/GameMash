@@ -40,11 +40,10 @@ license = "CC0"
 
 [[asset]]
 files = ["sounds/rifle_shot.wav", "sounds/pistol_shot.wav"]
-what = "Gunshot recordings (sks, cz)"
-author = "Vincent Sevedge"
-source = "https://opengameart.org/content/gunshot-sounds"
-license = "CC-BY-3.0"
-replace = true
+what = "Rifle and pistol shots, synthesised from noise and sine sweeps by scripts/gen_gunshots.py"
+author = "GameMash"
+source = "scripts/gen_gunshots.py"
+license = "original"
 
 [[asset]]
 files = ["sounds/*_reload.wav", "sounds/explosion.mp3", "sounds/engine_loop.wav"]
